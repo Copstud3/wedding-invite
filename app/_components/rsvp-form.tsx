@@ -29,12 +29,26 @@ export default function RsvpForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Clear previous errors
+    setErrors({});
+
+    // Validation
+    const newErrors: Record<string, string> = {};
+
     if (!name) {
-      setErrors({ name: "Name is required" });
-      return;
+      newErrors.name = "Name is required";
     }
     if (!email) {
-      setErrors({ name: "Email is required" });
+      newErrors.email = "Email is required";
+    }
+
+    // Check if user selected "No" but has accompany count > 0
+    if (accompany && parseInt(accompany) > 0 && attendance.toLowerCase() === "no") {
+      newErrors.accompany = "You can't have guests if you can't make it";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -56,35 +70,36 @@ export default function RsvpForm() {
       setName("");
       setEmail("");
       setAccompany(null);
-      setAttendance("yes")
-      setErrors({})
-    }else {
-    toast.error("Error", {
+      setAttendance("yes");
+      setErrors({});
+    } else {
+      toast.error("Error", {
         description: response.message,
-    })
+      });
 
-    if(response.error){
-      if(response.error.code === "23505"){
+      if (response.error) {
+        if (response.error.code === "23505") {
           setErrors({email: "Email already exists (You responded already)"});
+        }
       }
     }
-}
 
-setIsLoading(false);
-
+    setIsLoading(false);
   };
 
   return (
-    <div className="max-w-md mx-auto my-10">
-      <h1 className="text-2xl font-bold mb-4">{strings.title}</h1>
-      <p className="mb-6">{strings.description}</p>
+    <div className=" my-10">
+      <h1 className="text-[48px] md:text-[90px] font-bold mb-4 font-poppins text-center bg-gradient-to-r from-black to-gray-300 bg-clip-text text-transparent ">{strings.title}</h1>
+      <h2 className="text-center mb-4 text-lg md:text-2xl font-poppins font-bold">{strings.topic}</h2>
+      <div className="max-sm:px-10 md:max-w-md mx-auto">
+      <p className="mb-6 font-inter text-center mx-auto md:w-[400px]">{strings.description}</p>
       <div className="mb-4">
-        <label>{strings.eventDateLabel}</label>
+        <label className="font-semibold">{strings.eventDateLabel}</label>
         {/* <p>{new Date(strings.eventDate).toLocaleDateString()}</p> */}
         <Calendar
           mode="single"
           selected={new Date(strings.eventDate)}
-          className="rounded-md border flex flex-col items-center"
+          className="rounded-md border flex flex-col items-center mt-3"
           fromDate={new Date(strings.eventDate)}
           toDate={new Date(strings.eventDate)}
           defaultMonth={new Date(strings.eventDate)}
@@ -103,12 +118,13 @@ setIsLoading(false);
         </div>
       </div>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="name">{strings.nameLabel}</label>
           <Input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your full name"
             required
           />
           {errors.name && (
@@ -116,12 +132,13 @@ setIsLoading(false);
           )}
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="email">{strings.emailLabel}</label>
           <Input
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
             required
           />
           {errors.email && (
@@ -129,20 +146,24 @@ setIsLoading(false);
           )}
         </div>
 
-        <div>
+        <div className="flex flex-col gap-1">
           <label htmlFor="accompany">{strings.accompanyLabel}</label>
           <Input
             id="accompany"
             type="number"
             min="0"
             value={accompany || ""}
+            placeholder="Number of people you accompany"
             onChange={(e) => setAccompany(e.target.value)}
           />
+          {errors.accompany && (
+            <p className="text-red-500 text-sm mt-1">{errors.accompany}</p>
+          )}
         </div>
 
         <div>
           <label>{strings.rsvpLabel}</label>
-          <RadioGroup value={attendance} onValueChange={setAttendance}>
+          <RadioGroup value={attendance} onValueChange={setAttendance} className="mt-3">
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="Yes" id="yes" />
               <label htmlFor="yes">{strings.yesOption}</label>
@@ -154,10 +175,11 @@ setIsLoading(false);
             </div>
           </RadioGroup>
         </div>
-        <Button disabled={isLoading} type="submit">
+        <Button disabled={isLoading} type="submit" className="w-full">
           {isLoading ? "Sending" : strings.submitButton}
         </Button>
       </form>
+      </div>
     </div>
   );
 }

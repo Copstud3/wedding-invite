@@ -1,8 +1,9 @@
 export const strings = {
   title: "Wedding RSVP",
   description:
-    "We're excited to celebrate our special day with you! Please let us know if you can make it.",
-  eventDate: "2024-06-15", // YYYY-MM-DD format
+    `We're excited to celebrate our special day with you! Please let us know if you can make it.`,
+  topic: "Senior man weds Senior woman",
+  eventDate: "2025-06-01", // YYYY-MM-DD format
   eventDateLabel: "Event Date",
   eventLocation: "Lagos Oriental Hotel",
   eventLocationLabel: "Event Location",
